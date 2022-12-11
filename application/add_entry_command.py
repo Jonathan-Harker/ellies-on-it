@@ -1,2 +1,8 @@
+from dataclasses import dataclass
+
+
+@dataclass
 class AddEntryCommand:
-    pass
+    account_name: str
+    date: str
+    balance: float
