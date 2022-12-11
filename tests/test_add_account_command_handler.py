@@ -6,7 +6,7 @@ import pandas
 
 from application.add_account_command import AddAccountCommand
 from application.add_account_command_handler import AddAccountCommandHandler
-from infrastructure.persitence import Persistence
+from infrastructure.local_persitence import LocalPersistence
 from interfaces.persistence_interface import PersistenceInterface
 from tests.doubles.persistence_spy import PersistenceSpy
 from tests.test_config import TestConfig
@@ -33,7 +33,7 @@ class TestAddAccountCommandHandler(unittest.TestCase):
 
     def test_handler_writes_a_pkl_file(self):
         path = self.get_file_path()
-        self.add_account(Persistence())
+        self.add_account(LocalPersistence())
         self.assertTrue(os.path.isfile(path))
         os.remove(path)
 
@@ -50,4 +50,9 @@ class TestAddAccountCommandHandler(unittest.TestCase):
         self.assertEqual(records[0]["account_type"], "debit")
 
     def test_handler_updates_a_pkl_file_when_adding_2_accounts(self):
-        pass
+        spy = PersistenceSpy()
+        self.add_account(spy)
+        self.add_account(spy)
+
+        df = spy.call_stack[1]["called_with"]["data"]
+        self.assertEqual(len(df), 2)

@@ -1,4 +1,3 @@
-import pandas
 from pandas import DataFrame
 
 from application.add_account_command import AddAccountCommand
@@ -18,5 +17,8 @@ class Accounts:
             "fixed_rate": self.command.fixed_rate,
             "date_rate_ends": self.command.date_rate_ends,
         }
+
+        df = self.persistence.read_pkl_file()
         data = DataFrame([table])
-        self.persistence.save_pkl_file(data=data)
+        df.append(data)
+        self.persistence.save_pkl_file(data=df)

@@ -1,10 +1,20 @@
+import os
+from os.path import join
+
 from pick import pick
 from rich.console import Console
+
+from application.add_account_command import AddAccountCommand
+from application.add_account_command_handler import AddAccountCommandHandler
+from infrastructure.local_persitence import LocalPersistence
 
 console = Console()
 
 
 class Cli:
+    def __init__(self):
+        os.environ["DATA_PATH"] = join("resources", "data.pkl")
+
     def home(self):
         title = 'What would you like to do today?'
         options = ["Add Account", "Update Account", "View", "Exit"]
@@ -12,6 +22,9 @@ class Cli:
         self.select_options(option)
 
     def select_options(self, option: str):
+        if option == "Exit":
+            exit(0)
+
         if option == "Add Account":
             option = self.add_account(option)
 
@@ -31,9 +44,17 @@ class Cli:
             self.home()
 
         account_name = self.set_account_name()
-        self.set_fixed_rate()
+        rate = self.set_fixed_rate()
+        command = AddAccountCommand(
+            account_name=account_name,
+            account_type=option,
+            date_rate_ends=None,
+            fixed_rate=rate["fixed"],
+            rate=rate["rate"],
+        )
+        handler = AddAccountCommandHandler(command=command, persistence=LocalPersistence())
+        handler.add_account()
         option = self.add_entry(option)
-
         return option
 
     def add_entry(self, option):
@@ -42,14 +63,15 @@ class Cli:
         option, _ = pick(options, title)
         if option == "Yes":
             pass
+
         return option
 
-    def set_fixed_rate(self):
+    def set_fixed_rate(self) -> dict:
         title = "Does this account have a fixed rate?"
         options = ["Yes", "No"]
         option, _ = pick(options, title)
-        if option == "Yes":
-            pass
+        rate = console.input("Set rate")
+        return {"rate": float(rate), "fixed": option == "Yes"}
 
     def set_account_name(self) -> str:
         account_name = ""

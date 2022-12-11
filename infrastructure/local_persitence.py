@@ -6,9 +6,10 @@ import pandas as pd
 from interfaces.persistence_interface import PersistenceInterface
 
 
-class Persistence(PersistenceInterface):
+class LocalPersistence(PersistenceInterface):
     def read_pkl_file(self) -> pandas.DataFrame:
-        pass
+        df = pandas.DataFrame([{}])
+        return df
 
     def save_pkl_file(self, data: pandas.DataFrame) -> None:
         df = pd.DataFrame()
