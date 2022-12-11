@@ -6,6 +6,7 @@ from rich.console import Console
 
 from application.add_account_command import AddAccountCommand
 from application.add_account_command_handler import AddAccountCommandHandler
+from domain.accounts import Accounts
 from infrastructure.local_persitence import LocalPersistence
 
 console = Console()
@@ -13,7 +14,8 @@ console = Console()
 
 class Cli:
     def __init__(self):
-        os.environ["DATA_PATH"] = join("resources", "data.pkl")
+        base = os.path.dirname(os.path.realpath(__file__))
+        os.environ["DATA_PATH"] = join(base, "resources", "data.pkl")
 
     def home(self):
         title = 'What would you like to do today?'
@@ -26,17 +28,24 @@ class Cli:
             exit(0)
 
         if option == "Add Account":
-            option = self.add_account(option)
+            option = self.add_account()
+            self.home()
 
         if option == "Update Account":
-            pass
+            print("Coming Soon")
+            self.home()
 
         if option == "View":
-            pass
+            self.view_account()
+            self.home()
 
-        console.print(option)
+    def view_account(self):
+        accounts = Accounts(command=None, persistence=LocalPersistence())
+        account_list = accounts.get_accounts_list()
+        title = "Which account would you like to view?"
+        option, _ = pick(account_list, title)
 
-    def add_account(self, option):
+    def add_account(self):
         title = "What type of account would you like to add?"
         options = ["Debit", "Credit", "Investment", "Back"]
         option, _ = pick(options, title)

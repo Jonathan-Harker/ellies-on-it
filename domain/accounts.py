@@ -1,3 +1,5 @@
+from typing import List
+
 from pandas import DataFrame
 
 from application.add_account_command import AddAccountCommand
@@ -20,5 +22,11 @@ class Accounts:
 
         df = self.persistence.read_pkl_file()
         data = DataFrame([table])
-        df.append(data)
+        df = df.append(data)
+        print(df.head())
         self.persistence.save_pkl_file(data=df)
+
+    def get_accounts_list(self) -> List[dict]:
+        df = self.persistence.read_pkl_file()
+        res = df.to_dict(orient="records")
+        return res
