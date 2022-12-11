@@ -1,4 +1,5 @@
 import os
+import time
 from os.path import join
 
 from pick import pick
@@ -15,7 +16,7 @@ console = Console()
 class Cli:
     def __init__(self):
         base = os.path.dirname(os.path.realpath(__file__))
-        os.environ["DATA_PATH"] = join(base, "resources", "data.pkl")
+        os.environ["DATA_PATH"] = join(base, "resources")
 
     def home(self):
         title = 'What would you like to do today?'
@@ -32,18 +33,29 @@ class Cli:
             self.home()
 
         if option == "Update Account":
-            print("Coming Soon")
+            self.update_account()
             self.home()
 
         if option == "View":
             self.view_account()
             self.home()
 
+    def update_account(self):
+        accounts = Accounts(command=None, persistence=LocalPersistence())
+        account_list = accounts.get_accounts_list()
+        title = "Which account would you like to update?"
+        option, _ = pick(account_list, title)
+        self.add_entry(account_name=option["account_name"])
+        self.home()
+
     def view_account(self):
         accounts = Accounts(command=None, persistence=LocalPersistence())
         account_list = accounts.get_accounts_list()
         title = "Which account would you like to view?"
         option, _ = pick(account_list, title)
+        print("Not implemented yet")
+        time.sleep(3)
+        self.home()
 
     def add_account(self):
         title = "What type of account would you like to add?"
@@ -63,17 +75,20 @@ class Cli:
         )
         handler = AddAccountCommandHandler(command=command, persistence=LocalPersistence())
         handler.add_account()
-        option = self.add_entry(option)
-        return option
 
-    def add_entry(self, option):
         title = "Would you like to add an entry now?"
         options = ["Yes", "No"]
         option, _ = pick(options, title)
-        if option == "Yes":
-            pass
 
-        return option
+        if option == "Yes":
+            self.add_entry(account_name=account_name)
+
+        self.home()
+
+    def add_entry(self, account_name: str):
+        command = AddEntryCommand()
+        handler = AddEntryCommandHandler(command=command)
+        self.home()
 
     def set_fixed_rate(self) -> dict:
         title = "Does this account have a fixed rate?"

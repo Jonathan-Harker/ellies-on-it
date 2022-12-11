@@ -1,0 +1,2 @@
+class AddEntryCommand:
+    pass
